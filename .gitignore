@@ -1,0 +1,47 @@
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+
+# Fraud Detection Project Specific
+# Data files
+# data/*.csv
+data/*.pkl
+data/*.h5
+
+# Model files
+models/*.pkl
+models/*.h5
+models/*.joblib
+
+# src/models/*.pkl
+
+# Reports and outputs
+reports/*.png
+reports/*.jpg
+reports/*.pdf
+reports/*.html
+
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+
+**/*.csv
+**/*.pkl
+**/*.h5
+**/__pycache__/*
