@@ -8,16 +8,19 @@
 </head>
 <body>
 <div class="container mt-5">
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'model_comparison' %}" class="btn btn-secondary">Go to Comparison</a>
+    </div>
     <h1>Fraud Detection - Model Inference</h1>
     <form method="post">
         {% csrf_token %}
         <div class="mb-3">
             <label for="modelSelect" class="form-label">Select Model</label>
             <select class="form-select" id="modelSelect" name="model">
-                <option value="logistic_regression">Logistic Regression</option>
-                <option value="neural_network">Neural Network</option>
-                <option value="knn">KNN</option>
-                <option value="decision_tree">Decision Tree</option>
+                <option value="logistic_regression" {% if request.POST.model == 'logistic_regression' %}selected{% endif %}>Logistic Regression</option>
+                <option value="neural_network" {% if request.POST.model == 'neural_network' %}selected{% endif %}>Neural Network</option>
+                <option value="knn" {% if request.POST.model == 'knn' %}selected{% endif %}>KNN</option>
+                <option value="decision_tree" {% if request.POST.model == 'decision_tree' %}selected{% endif %}>Decision Tree</option>
             </select>
         </div>
         <button type="submit" class="btn btn-primary">Get Inference</button>
@@ -63,7 +66,6 @@
                                 y: {
                                     beginAtZero: true,
                                     max: 1,
-                                    min: -1,
                                     title: { display: true, text: 'Value' }
                                 },
                                 x: {
@@ -80,4 +82,4 @@
     </div>
 </div>
 </body>
-</html> 
+</html>

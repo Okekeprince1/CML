@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-f(sdz!#13len=5dbw5=%g3+_n=1z7q(7@k+=12wdvty88-xb4g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['cloud-fraud-ml-nenv.eba-te7psemy.us-east-1.elasticbeanstalk.com', 'localhost', '127.0.0.1','172.31.45.176']
 
 
 # Application definition

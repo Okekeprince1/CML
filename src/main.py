@@ -2,7 +2,7 @@
 Main Pipeline for Fraud Detection Project
 Orchestrates the complete workflow using existing train/test datasets.
 """
-
+import os
 from ast import arg
 import logging
 import argparse
@@ -253,11 +253,29 @@ class FraudDetectionPipeline:
         logger.info("==================================")
         
         return True
+    
+    def create_sample_csv(self, sample_size=200):
+        try:
+            df1 = pd.read_csv(f"{self.config['data_dir']}/X_test_processed.csv")
+            df2 = pd.read_csv(f"{self.config['data_dir']}/y_test_processed.csv").iloc[:, 0]
+        except FileNotFoundError:
+            print("Error: file not found.")
+            return False
+
+        sample_size =  min(len(df1), sample_size)
+
+        df_sample1 = df1.sample(n=sample_size, random_state=42)
+        df_sample2 = df2.iloc[df_sample1.index].sample(n=sample_size, random_state=42)
+        os.makedirs(self.config['s3_output'], exist_ok=True)
+        df_sample1.to_csv(f"{self.config['s3_output']}/X_test_processed.csv", index=False)
+        df_sample2.to_csv(f"{self.config['s3_output']}/y_test_processed.csv", index=False)
+        return True
 
 def main():
     """Main function to run the fraud detection pipeline."""
     parser = argparse.ArgumentParser(description="Fraud Detection Pipeline")
     parser.add_argument("--plot-only", action="store_true", help="Plot model feature importance")
+    parser.add_argument("--output-only", action="store_true", help="Generate sample CSV files")
     
     args = parser.parse_args()
     
@@ -266,26 +284,37 @@ def main():
         'data_dir': 'data',
         'models_dir': 'models',
         'reports_dir': 'reports',
+        's3_output': 's3_outputs',
         'load_data': True,
         'preprocess_data': True,
         'train_models': True,
         'evaluate_models': True
     }
     
-    # Run pipeline
     pipeline = FraudDetectionPipeline(config)
-    if (not args.plot_only):
+    if (not args.plot_only and not args.output_only):
+        # Run pipeline
         success = pipeline.run_pipeline()
-    else:
+        if success:
+            print("\nFraud Detection Pipeline completed successfully!")
+            print("Check the 'reports' directory for detailed results")
+            print("Models are saved in the 'models' directory")
+    elif args.plot_only:
         # Plot feature importance results
         success = pipeline.feature_importance_result()
-    
-    if success:
-        print("\nFraud Detection Pipeline completed successfully!")
-        print("Check the 'reports' directory for detailed results")
-        print("Models are saved in the 'models' directory")
-    else:
-        print("\nFraud Detection Pipeline failed!")
+        if success:
+            print("\nFeature Importance results plotted successfully!")
+            print("Check the 'reports' directory for feature importance plots")
+        else:
+            print("\nFailed to plot Feature Importance results!")
+    elif args.output_only:
+        # Create sample CSV files
+        success = pipeline.create_sample_csv(sample_size=200)
+        if success:
+            print("\nSample CSV files created successfully!")
+            print("Check the 's3_outputs' directory for sample CSV files")
+        else:
+            print("\nFailed to create sample CSV files!")
 
 if __name__ == "__main__":
     main() 

@@ -15,19 +15,19 @@
             <div class="col">
                 <label for="model1Select" class="form-label">Select Model 1</label>
                 <select class="form-select" id="model1Select" name="model1">
-                    <option value="logistic_regression">Logistic Regression</option>
-                    <option value="neural_network">Neural Network</option>
-                    <option value="knn">KNN</option>
-                    <option value="decision_tree">Decision Tree</option>
+                    <option value="logistic_regression" {% if request.POST.model1 == 'logistic_regression' %}selected{% endif %}>Logistic Regression</option>
+                    <option value="neural_network" {% if request.POST.model1 == 'neural_network' %}selected{% endif %}>Neural Network</option>
+                    <option value="knn" {% if request.POST.model1 == 'knn' %}selected{% endif %}>KNN</option>
+                    <option value="decision_tree" {% if request.POST.model1 == 'decision_tree' %}selected{% endif %}>Decision Tree</option>
                 </select>
             </div>
             <div class="col">
                 <label for="model2Select" class="form-label">Select Model 2</label>
                 <select class="form-select" id="model2Select" name="model2">
-                    <option value="logistic_regression">Logistic Regression</option>
-                    <option value="neural_network">Neural Network</option>
-                    <option value="knn">KNN</option>
-                    <option value="decision_tree">Decision Tree</option>
+                    <option value="logistic_regression" {% if request.POST.model2 == 'logistic_regression' %}selected{% endif %}>Logistic Regression</option>
+                    <option value="neural_network" {% if request.POST.model2 == 'neural_network' %}selected{% endif %}>Neural Network</option>
+                    <option value="knn" {% if request.POST.model2 == 'knn' %}selected{% endif %}>KNN</option>
+                    <option value="decision_tree" {% if request.POST.model2 == 'decision_tree' %}selected{% endif %}>Decision Tree</option>
                 </select>
             </div>
         </div>
@@ -39,27 +39,35 @@
             {% if comparison %}
                 <h4>Numerical Comparison</h4>
                 <ul>
-                    <li>Accuracy Model 1: {{ comparison.accuracy1 }}</li>
-                    <li>Accuracy Model 2: {{ comparison.accuracy2 }}</li>
-                    <li>Difference: {{ comparison.difference }}</li>
+                    <li>Accuracy {{ model1 }}: {{ comparison.accuracy1 }}</li>
+                    <li>Accuracy {{ model2 }}: {{ comparison.accuracy2 }}</li>
+                    <li>Inference Time {{ model1 }}: {{ comparison.inference_time1 }} seconds</li>
+                    <li>Inference Time {{ model2 }}: {{ comparison.inference_time2 }} seconds</li>
+                    <li>Difference in Accuracy: {{ comparison.difference }}</li>
                 </ul>
                 <canvas id="comparisonChart" width="600" height="300"></canvas>
                 <script>
                     const ctx = document.getElementById('comparisonChart').getContext('2d');
                     const chart = new Chart(ctx, {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: {{ comparison.chart_labels|safe }},
                             datasets: [
                                 {
-                                    label: 'Model 1',
+                                    label: '{{ model1 }}',
                                     data: {{ comparison.model1_data|safe }},
-                                    backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    fill: false,
+                                    tension: 0.1
                                 },
                                 {
-                                    label: 'Model 2',
+                                    label: '{{ model2 }}',
                                     data: {{ comparison.model2_data|safe }},
-                                    backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    fill: false,
+                                    tension: 0.1
                                 }
                             ]
                         },
@@ -67,7 +75,17 @@
                             responsive: true,
                             plugins: {
                                 legend: { position: 'top' },
-                                title: { display: true, text: 'Model Comparison' }
+                                title: { display: true, text: '{{ model1 }} vs {{ model2 }}' }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 1,
+                                    title: { display: true, text: 'Prediction Value' }
+                                },
+                                x: {
+                                    title: { display: true, text: 'Sample Index' }
+                                }
                             }
                         }
                     });
@@ -79,4 +97,4 @@
     </div>
 </div>
 </body>
-</html> 
+</html>
