@@ -43,7 +43,7 @@ This project implements a comprehensive fraud detection system using multiple ma
 ## Getting Started
 
 ### Prerequisites
-1. Ensure you have the dataset files in the project root:
+1. Ensure you have the dataset files from Kaggle [https://www.kaggle.com/datasets/kartik2112/fraud-detection] in the project root:
    - `fraudTrain.csv`
    - `fraudTest.csv`
 
