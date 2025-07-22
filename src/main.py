@@ -120,7 +120,7 @@ class FraudDetectionPipeline:
             # Train Neural Network
             logger.info("Training Neural Network model...")
             nn_model = FraudNeuralNetwork()
-            nn_model.train(X_train, y_train)
+            nn_model.train(X_train, y_train, X_test, y_test)
             nn_results = nn_model.evaluate(X_test, y_test)
             nn_model.save_model(f"{self.config['models_dir']}/neural_network_model.h5")
             self.models['neural_network'] = nn_model
@@ -201,20 +201,20 @@ class FraudDetectionPipeline:
             # Train Neural Network
             logger.info("Feature Importance Neural Network model...")
             nn_model = FraudNeuralNetwork()
-            nn_model.train(X_train, y_train)
+            nn_model.load_model(f"{self.config['models_dir']}/neural_network_model.h5")
             nn_model.plot_results(X_train, y_train, "reports/feature_importance_neural_network.png")
             
-            # Train KNN Model
-            logger.info("Feature Importance KNN model...")
-            knn_model = FraudKNNModel()
-            knn_model.train(X_train, y_train)
-            knn_model.plot_results(X_train, y_train, "reports/feature_importance_knn.png")
+            # # Train KNN Model
+            # logger.info("Feature Importance KNN model...")
+            # knn_model = FraudKNNModel()
+            # knn_model.train(X_train, y_train)
+            # knn_model.plot_results(X_train, y_train, "reports/feature_importance_knn.png")
             
-            # Train Decision Tree Model
-            logger.info("Feature Importance Decision Tree model...")
-            dt_model = FraudDecisionTreeModel()
-            dt_model.train(X_train, y_train)
-            dt_model.plot_results(X_train, y_train, "reports/feature_importance_decision.png")
+            # # Train Decision Tree Model
+            # logger.info("Feature Importance Decision Tree model...")
+            # dt_model = FraudDecisionTreeModel()
+            # dt_model.train(X_train, y_train)
+            # dt_model.plot_results(X_train, y_train, "reports/feature_importance_decision.png")
             
             logger.info("All models Feature Importance gotten successfully!")
             return True

@@ -78,19 +78,9 @@ class FraudNeuralNetwork:
         start_time = time.time()
         self.model = self.build_model(X_train.shape[1])
         
-        if X_val is None or y_val is None:
-            X_train_split, X_val, y_train_split, y_val = train_test_split(
-                X_train, y_train,
-                test_size=0.2,
-                random_state=self.config['random_state'],
-                stratify=y_train
-            )
-        else:
-            X_train_split, y_train_split = X_train, y_train
-        
         try:
             self.history = self.model.fit(
-                X_train_split, y_train_split,
+                X_train, y_train,
                 validation_data=(X_val, y_val),
                 batch_size=self.config['batch_size'],
                 epochs=self.config['epochs'],
@@ -158,53 +148,6 @@ class FraudNeuralNetwork:
         logger.info(f"Evaluation completed. Accuracy: {test_accuracy:.4f}, AUC-ROC: {auc_roc:.4f}")
         return results
     
-    def compute_feature_importance(self, X_test: pd.DataFrame, y_test: pd.Series) -> pd.DataFrame:
-        """Computes feature importance using permutation importance."""
-        logger.info("Computing feature importance...")
-        try:
-            r = permutation_importance(
-                estimator=lambda X: self.model.predict(X).flatten(),
-                X=X_test,
-                y=y_test,
-                scoring='f1',
-                n_repeats=10,
-                random_state=self.config['random_state']
-            )
-            self.feature_importance = pd.DataFrame({
-                'feature': X_test.columns,
-                'importance': r.importances_mean
-            }).sort_values('importance', ascending=False)
-        except Exception as e:
-            logger.error(f"Feature importance computation failed: {e}")
-            raise
-        return self.feature_importance
-    
-    def plot_training_history(self, save_path: str = None):
-        """Plots training history."""
-        if self.history is None:
-            logger.warning("No training history available")
-            return
-        
-        fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-        axes = axes.flatten()
-        
-        metrics = ['loss', 'accuracy', 'precision', 'recall']
-        titles = ['Model Loss', 'Model Accuracy', 'Model Precision', 'Model Recall']
-        
-        for i, (metric, title) in enumerate(zip(metrics, titles)):
-            axes[i].plot(self.history.history[metric], label=f'Training {metric.capitalize()}')
-            axes[i].plot(self.history.history[f'val_{metric}'], label=f'Validation {metric.capitalize()}')
-            axes[i].set_title(title)
-            axes[i].set_xlabel('Epoch')
-            axes[i].set_ylabel(metric.capitalize())
-            axes[i].legend()
-        
-        plt.tight_layout()
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            logger.info(f"Training history plot saved to: {save_path}")
-        plt.show()
-    
     def plot_results(self, X_test: pd.DataFrame, y_test: pd.Series, save_path: str = None):
         """Plots model results, including feature importance."""
         if self.model is None:
@@ -241,16 +184,6 @@ class FraudNeuralNetwork:
         axes[2].set_title('Prediction Distribution')
         axes[2].legend()
         
-        # Feature Importance
-        if self.feature_importance is None:
-            self.compute_feature_importance(X_test, y_test)
-        top_features = self.feature_importance.head(10)
-        axes[3].barh(range(len(top_features)), top_features['importance'])
-        axes[3].set_yticks(range(len(top_features)))
-        axes[3].set_yticklabels(top_features['feature'])
-        axes[3].set_xlabel('Feature Importance')
-        axes[3].set_title('Top 10 Feature Importance')
-        
         plt.tight_layout()
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
@@ -282,6 +215,8 @@ class FraudNeuralNetwork:
             self.history = metadata['history']
             self.feature_importance = metadata.get('feature_importance')
             logger.info(f"Model loaded from: {file_path}")
+            logger.info(f"feature importance loaded from: {self.feature_importance}")
+
         except Exception as e:
             logger.error(f"Model loading failed: {e}")
             raise
